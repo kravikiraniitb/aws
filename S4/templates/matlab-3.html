@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload MATLAB File</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <div id="container">
+        <h1>Upload MATLAB File</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="file" id="fileInput" accept=".m" required>
+            <input type="submit" value="Upload">
+        </form>
+        <div id="graphContainer"></div>
+        <div id="loadingText" style="display: none;">Please wait...</div>
+
+        <script>
+            $('#uploadForm').submit(function(e) {
+                e.preventDefault();
+                var formData = new FormData();
+                formData.append('file', $('#fileInput')[0].files[0]);
+
+                $('#loadingText').show();
+                $('#graphContainer').empty();
+
+                $.ajax({
+                    url: 'http://54.224.92.191:5000/upload',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        var graphUrl = response.graph;
+                        var image = new Image();
+                        image.src = 'data:image/png;base64,' + graphUrl;
+                        image.onload = function() {
+                            $('#loadingText').hide();
+                            $('#graphContainer').empty();
+                            $('#graphContainer').append(image);
+                        };
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>
